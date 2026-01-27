@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工廠環境衛生點檢系統</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #4285F4;
+      --success-color: #4CAF50;
+      --warning-color: #FFC107;
+      --danger-color: #F44336;
+      --gray-color: #E0E0E0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      padding: 15px;
+      margin: 0;
+    }
+    
+    .system-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    
+    .system-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .lang-toggle {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid white;
+      color: white;
+      padding: 6px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    
+    .lang-toggle:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .inspection-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+    
+    .area-btn {
+      padding: 15px;
+      border: 2px solid var(--gray-color);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-weight: 500;
+      position: relative;
+    }
+    
+    .area-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .area-btn.completed {
+      background: var(--success-color);
+      color: white;
+      border-color: var(--success-color);
+    }
+    
+    .area-btn.in-progress {
+      background: var(--warning-color);
+      color: white;
+      border-color: var(--warning-color);
+    }
+    
+    .area-btn.selected {
+      border-color: var(--primary-color);
+      border-width: 3px;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+    }
+    
+    .area-name {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+    
+    .area-name-en {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+    
+    .area-progress {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 8px;
+      padding: 3px 8px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 10px;
+      display: inline-block;
+    }
+    
+    .area-btn.completed .area-progress,
+    .area-btn.in-progress .area-progress {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .item-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .item-number {
+      display: inline-block;
+      background: var(--primary-color);
+      color: white;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      border-radius: 50%;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .item-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .item-name-en {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+    
+    .status-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .status-btn {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .status-btn.ok {
+      border-color: var(--success-color);
+      color: var(--success-color);
+    }
+    
+    .status-btn.ok.active {
+      background: var(--success-color);
+      color: white;
+    }
+    
+    .status-btn.nok {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+    }
+    
+    .status-btn.nok.active {
+      background: var(--danger-color);
+      color: white;
+    }
+    
+    .status-btn.pending {
+      border-color: var(--warning-color);
+      color: var(--warning-color);
+    }
+    
+    .status-btn.pending.active {
+      background: var(--warning-color);
+      color: white;
+    }
+    
+    .temp-humidity-input {
+      background: #e3f2fd;
+      border-left-color: #2196F3;
+    }
+    
+    .temp-status {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    
+    .temp-status.normal {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+    
+    .temp-status.abnormal {
+      background: #ffcdd2;
+      color: #c62828;
+    }
+    
+    .loading {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      text-align: center;
+    }
+    
+    .loading.show {
+      display: block;
+    }
+    
+    .progress-summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+      .area-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      
+      .system-title {
+        font-size: 1.2rem;
+      }
+      
+      .status-buttons {
+        flex-direction: column;
+      }
+      
+      .lang-toggle {
+        position: static;
+        display: inline-block;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <!-- 系統標題 -->
+    <div class="system-header position-relative">
+      <button class="lang-toggle" onclick="toggleLanguage()">
+        <i class="bi bi-globe"></i> 
+        <span id="langText">中文 / EN</span>
+      </button>
+      <div class="system-title" id="systemTitle">
+        🏭 工廠環境衛生點檢系統
+      </div>
+      <div style="font-size: 0.9rem; opacity: 0.9;" id="systemSubtitle">
+        Factory Environmental Hygiene Inspection System
+      </div>
+      <div style="font-size: 0.85rem; margin-top: 8px; opacity: 0.8;">
+        <span id="formNumberLabel">表單編號</span>: QP-7.5-001 (ISO 9001)
+      </div>
+    </div>
+    
+    <!-- 基本資訊 -->
+    <div class="inspection-card">
+      <h6 class="mb-3">
+        <i class="bi bi-calendar-check"></i> 
+        <span id="basicInfoTitle">基本資訊</span>
+      </h6>
+      
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label"><span id="dateLabel">日期</span> Date</label>
+          <input type="date" class="form-control" id="inspectionDate" required>
+        </div>
+        
+        <div class="col-md-4">
+          <label class="form-label"><span id="shiftLabel">時段</span> Shift</label>
+          <select class="form-select" id="inspectionShift" required>
+            <option value="早">早 Morning</option>
+            <option value="晚">晚 Evening</option>
+            <option value="其它">其它 Other</option>
+          </select>
+        </div>
+        
+        <div class="col-md-4">
+          <label class="form-label"><span id="inspectorLabel">點檢人員</span> Inspector</label>
+          <select class="form-select" id="inspectorName" required>
+            <option value="">-- 請選擇 Please Select --</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 整體進度 -->
+    <div class="progress-summary" id="totalProgress">
+      <i class="bi bi-check2-square"></i> 
+      <span id="progressLabel">總進度</span> Total Progress: 
+      <span id="totalProgressText">0/0 (0%)</span>
+    </div>
+    
+    <!-- 區域選擇 -->
+    <div class="inspection-card">
+      <h6 class="mb-3">
+        <i class="bi bi-building"></i> 
+        <span id="areaSelectionTitle">區域選擇</span> Area Selection
+      </h6>
+      <div class="text-muted mb-3" style="font-size: 0.85rem;">
+        <span style="color: var(--success-color);">● <span id="completedLabel">已完成</span></span>
+        <span style="margin-left: 15px; color: var(--warning-color);">● <span id="inProgressLabel">進行中</span></span>
+        <span style="margin-left: 15px; color: var(--gray-color);">● <span id="notStartedLabel">未開始</span></span>
+      </div>
+      <div class="area-grid" id="areaGrid">
+        <!-- 動態產生區域按鈕 -->
+      </div>
+      
+      <!-- 提交按鈕 -->
+      <div class="text-center mt-4">
+        <button class="btn btn-primary btn-lg" onclick="submitAllInspection()" style="min-width: 250px; padding: 12px 30px; font-size: 1.1rem; font-weight: 600;">
+          <i class="bi bi-check-circle"></i> 
+          <span id="submitBtnText">提交所有點檢資料</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 點檢項目 -->
+    <div class="inspection-card" id="itemsSection" style="display: none;">
+      <h6 class="mb-3">
+        <i class="bi bi-list-check"></i> 
+        <span id="itemsTitle">點檢項目</span>
+        <span id="areaName" class="text-primary"></span>
+      </h6>
+      
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        <span id="areaProgressLabel">本區進度</span>: 
+        <span id="itemProgress">0/0</span>
+      </div>
+      
+      <div id="itemsList">
+        <!-- 動態產生點檢項目 -->
+      </div>
+    </div>
+    
+    <!-- 載入中 -->
+    <div class="loading" id="loadingDiv">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-3" id="loadingText">處理中，請稍候...</div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    let currentLang = 'zh-TW';
+    let currentArea = null;
+    let inspectionData = {}; // 儲存所有區域的點檢資料
+    let allAreas = [];
+    
+    // 翻譯對照表
+    const i18n = {
+      'zh-TW': {
+        systemTitle: '🏭 工廠環境衛生點檢系統',
+        systemSubtitle: 'Factory Environmental Hygiene Inspection System',
+        formNumberLabel: '表單編號',
+        basicInfoTitle: '基本資訊',
+        dateLabel: '日期',
+        shiftLabel: '時段',
+        inspectorLabel: '點檢人員',
+        progressLabel: '總進度',
+        areaSelectionTitle: '區域選擇',
+        completedLabel: '已完成',
+        inProgressLabel: '進行中',
+        notStartedLabel: '未開始',
+        itemsTitle: '點檢項目',
+        areaProgressLabel: '本區進度',
+        submitBtnText: '提交所有點檢資料',
+        loadingText: '處理中，請稍候...',
+        langText: '中文 / EN',
+        okBtn: 'OK',
+        nokBtn: 'NOK',
+        pendingBtn: '待追蹤',
+        notePlaceholder: '備註 (選填)',
+        tempPlaceholder: '溫度 (℃)',
+        humidityPlaceholder: '濕度 (%RH)'
+      },
+      'en-US': {
+        systemTitle: '🏭 Factory Environmental Hygiene Inspection System',
+        systemSubtitle: '工廠環境衛生點檢系統',
+        formNumberLabel: 'Form Number',
+        basicInfoTitle: 'Basic Information',
+        dateLabel: 'Date',
+        shiftLabel: 'Shift',
+        inspectorLabel: 'Inspector',
+        progressLabel: 'Total Progress',
+        areaSelectionTitle: 'Area Selection',
+        completedLabel: 'Completed',
+        inProgressLabel: 'In Progress',
+        notStartedLabel: 'Not Started',
+        itemsTitle: 'Inspection Items',
+        areaProgressLabel: 'Area Progress',
+        submitBtnText: 'Submit All',
+        loadingText: 'Processing, please wait...',
+        langText: 'EN / 中文',
+        okBtn: 'OK',
+        nokBtn: 'NOK',
+        pendingBtn: 'Pending',
+        notePlaceholder: 'Note (Optional)',
+        tempPlaceholder: 'Temperature (℃)',
+        humidityPlaceholder: 'Humidity (%RH)'
+      }
+    };
+    
+    // 初始化
+    window.onload = function() {
+      document.getElementById('inspectionDate').valueAsDate = new Date();
+      loadInspectors();
+      loadAreas();
+    };
+    
+    // 載入點檢人員
+    function loadInspectors() {
+      google.script.run
+        .withSuccessHandler(function(inspectors) {
+          const select = document.getElementById('inspectorName');
+          select.innerHTML = '<option value="">-- 請選擇 Please Select --</option>';
+          inspectors.forEach(inspector => {
+            const option = document.createElement('option');
+            option.value = inspector;
+            option.textContent = inspector;
+            select.appendChild(option);
+          });
+        })
+        .withFailureHandler(function(error) {
+          console.error('載入點檢人員失敗:', error);
+        })
+        .getInspectorList();
+    }
+    
+    // 載入區域
+    function loadAreas() {
+      google.script.run
+        .withSuccessHandler(function(areas) {
+          allAreas = areas;
+          renderAreas();
+          updateTotalProgress();
+        })
+        .withFailureHandler(function(error) {
+          alert('載入區域失敗: ' + error);
+        })
+        .getAllInspectionItems();
+    }
+    
+    // 渲染區域按鈕
+    function renderAreas() {
+      const grid = document.getElementById('areaGrid');
+      grid.innerHTML = '';
+      
+      allAreas.forEach((area, index) => {
+        const areaKey = area.code;
+        const completed = getAreaCompletedCount(areaKey);
+        const total = area.items.length;
+        
+        const btn = document.createElement('div');
+        btn.className = 'area-btn';
+        btn.dataset.areaCode = areaKey;
+        
+        if (completed === total && total > 0) {
+          btn.classList.add('completed');
+        } else if (completed > 0) {
+          btn.classList.add('in-progress');
+        }
+        
+        btn.innerHTML = `
+          <div class="area-name">${area.name_zh}</div>
+          <div class="area-name-en">${area.name_en}</div>
+          <div class="area-progress">${completed}/${total}</div>
+        `;
+        btn.onclick = () => selectArea(area, btn);
+        grid.appendChild(btn);
+      });
+    }
+    
+    // 取得區域完成數量
+    function getAreaCompletedCount(areaCode) {
+      if (!inspectionData[areaCode]) return 0;
+      return Object.keys(inspectionData[areaCode]).length;
+    }
+    
+    // 選擇區域
+    function selectArea(area, btnElement) {
+      currentArea = area;
+      
+      document.querySelectorAll('.area-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      btnElement.classList.add('selected');
+      
+      renderItems();
+      
+      document.getElementById('itemsSection').style.display = 'block';
+      document.getElementById('areaName').textContent = `(${area.name_zh})`;
+      
+      setTimeout(() => {
+        document.getElementById('itemsSection').scrollIntoView({behavior: 'smooth', block: 'start'});
+      }, 100);
+    }
+    
+    // 渲染點檢項目
+    function renderItems() {
+      const list = document.getElementById('itemsList');
+      list.innerHTML = '';
+      
+      const areaKey = currentArea.code;
+      const areaData = inspectionData[areaKey] || {};
+      const t = i18n[currentLang];
+      
+      currentArea.items.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        
+        const isTempHumidity = item.type === 'temperature' || item.type === 'humidity';
+        
+        if (isTempHumidity) {
+          card.classList.add('temp-humidity-input');
+        }
+        
+        const savedData = areaData[item.no] || {};
+        const savedStatus = savedData.status || '';
+        const savedNote = savedData.note || '';
+        const savedValue = savedData.value || '';
+        
+        const displayName = currentLang === 'zh-TW' ? item.name_zh : item.name_en;
+        const altName = currentLang === 'zh-TW' ? item.name_en : item.name_zh;
+        
+        card.innerHTML = `
+          <div class="item-name">
+            <span class="item-number">${item.no}</span>
+            ${displayName}
+          </div>
+          <div class="item-name-en">${altName}</div>
+          
+          ${isTempHumidity ? `
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <input type="number" step="0.1" class="form-control" 
+                       placeholder="${item.type === 'temperature' ? t.tempPlaceholder : t.humidityPlaceholder}"
+                       id="value_${areaKey}_${item.no}"
+                       value="${savedValue}"
+                       onchange="saveTempHumidity('${areaKey}', ${item.no}, '${item.type}')">
+              </div>
+            </div>
+          ` : `
+            <div class="status-buttons">
+              <button class="status-btn ok ${savedStatus === 'OK' ? 'active' : ''}" 
+                      onclick="selectStatus('${areaKey}', ${item.no}, 'OK', this)">
+                <i class="bi bi-check-circle"></i> ${t.okBtn}
+              </button>
+              <button class="status-btn nok ${savedStatus === 'NOK' ? 'active' : ''}" 
+                      onclick="selectStatus('${areaKey}', ${item.no}, 'NOK', this)">
+                <i class="bi bi-x-circle"></i> ${t.nokBtn}
+              </button>
+              <button class="status-btn pending ${savedStatus === '待追蹤' ? 'active' : ''}" 
+                      onclick="selectStatus('${areaKey}', ${item.no}, '待追蹤', this)">
+                <i class="bi bi-clock"></i> ${t.pendingBtn}
+              </button>
+            </div>
+          `}
+          
+          <textarea class="form-control" rows="2" 
+                    placeholder="${t.notePlaceholder}" 
+                    id="note_${areaKey}_${item.no}"
+                    onchange="saveNote('${areaKey}', ${item.no})">${savedNote}</textarea>
+        `;
+        
+        list.appendChild(card);
+      });
+      
+      updateAreaProgress();
+    }
+    
+    // 選擇狀態
+    function selectStatus(areaKey, itemNo, status, btnElement) {
+      const buttons = btnElement.parentElement.querySelectorAll('.status-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      btnElement.classList.add('active');
+      
+      if (!inspectionData[areaKey]) inspectionData[areaKey] = {};
+      if (!inspectionData[areaKey][itemNo]) inspectionData[areaKey][itemNo] = {};
+      inspectionData[areaKey][itemNo].status = status;
+      
+      updateAreaProgress();
+      updateTotalProgress();
+      renderAreas();
+    }
+    
+    // 儲存備註
+    function saveNote(areaKey, itemNo) {
+      const note = document.getElementById(`note_${areaKey}_${itemNo}`).value;
+      if (!inspectionData[areaKey]) inspectionData[areaKey] = {};
+      if (!inspectionData[areaKey][itemNo]) inspectionData[areaKey][itemNo] = {};
+      inspectionData[areaKey][itemNo].note = note;
+    }
+    
+    // 儲存溫濕度
+    function saveTempHumidity(areaKey, itemNo, type) {
+      const value = document.getElementById(`value_${areaKey}_${itemNo}`).value;
+      if (!inspectionData[areaKey]) inspectionData[areaKey] = {};
+      if (!inspectionData[areaKey][itemNo]) inspectionData[areaKey][itemNo] = {};
+      inspectionData[areaKey][itemNo].value = value;
+      inspectionData[areaKey][itemNo].type = type;
+      inspectionData[areaKey][itemNo].status = 'TEMP';
+      
+      updateAreaProgress();
+      updateTotalProgress();
+      renderAreas();
+    }
+    
+    // 更新區域進度
+    function updateAreaProgress() {
+      if (!currentArea) return;
+      const completed = getAreaCompletedCount(currentArea.code);
+      const total = currentArea.items.length;
+      document.getElementById('itemProgress').textContent = `${completed}/${total}`;
+    }
+    
+    // 更新總進度
+    function updateTotalProgress() {
+      let totalCompleted = 0, totalItems = 0;
+      allAreas.forEach(area => {
+        totalItems += area.items.length;
+        totalCompleted += getAreaCompletedCount(area.code);
+      });
+      const percentage = totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
+      document.getElementById('totalProgressText').textContent = `${totalCompleted}/${totalItems} (${percentage}%)`;
+    }
+    
+    // 切換語系
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh-TW' ? 'en-US' : 'zh-TW';
+      updateUILanguage();
+      if (currentArea) renderItems();
+    }
+    
+    // 更新介面語言
+    function updateUILanguage() {
+      const t = i18n[currentLang];
+      Object.keys(t).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) el.textContent = t[key];
+      });
+    }
+    
+    // 移除項目名稱中的單位（括號部分）
+    function removeUnitFromName(name) {
+      // 移除 (℃), (%RH) 等括號內容
+      return name.replace(/\s*\([^)]*\)\s*$/, '').trim();
+    }
+    
+    // 提交所有點檢資料
+    function submitAllInspection() {
+      const date = document.getElementById('inspectionDate').value;
+      const shift = document.getElementById('inspectionShift').value;
+      const inspector = document.getElementById('inspectorName').value;
+      
+      if (!date || !shift || !inspector) {
+        alert(currentLang === 'zh-TW' ? '請填寫所有必填欄位！' : 'Please fill in all required fields!');
+        return;
+      }
+      
+      const dataArray = [];
+      allAreas.forEach(area => {
+        const areaData = inspectionData[area.code];
+        if (areaData) {
+          area.items.forEach(item => {
+            const itemData = areaData[item.no];
+            if (itemData && (itemData.status || itemData.value)) {
+              // 對溫濕度項目，移除名稱中的單位
+              const itemName = (item.type === 'temperature' || item.type === 'humidity') 
+                ? removeUnitFromName(item.name_zh) 
+                : item.name_zh;
+              
+              dataArray.push({
+                date, shift, inspector,
+                area: area.name_zh,
+                itemNo: item.no,
+                itemName: itemName,
+                status: itemData.status,
+                value: itemData.value,
+                type: itemData.type,
+                note: itemData.note || ''
+              });
+            }
+          });
+        }
+      });
+      
+      if (dataArray.length === 0) {
+        alert(currentLang === 'zh-TW' ? '請至少完成一個項目的點檢！' : 'Please complete at least one item!');
+        return;
+      }
+      
+      const msg = currentLang === 'zh-TW' 
+        ? `確定要提交 ${dataArray.length} 筆點檢資料嗎？` 
+        : `Submit ${dataArray.length} records?`;
+      
+      if (!confirm(msg)) return;
+      
+      document.getElementById('loadingDiv').classList.add('show');
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          document.getElementById('loadingDiv').classList.remove('show');
+          if (result.success) {
+            alert(currentLang === 'zh-TW' 
+              ? `✅ 提交成功！共 ${result.count} 筆記錄` 
+              : `✅ Success! ${result.count} records`);
+            inspectionData = {};
+            renderAreas();
+            updateTotalProgress();
+            document.getElementById('itemsSection').style.display = 'none';
+          } else {
+            alert('❌ ' + result.error);
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loadingDiv').classList.remove('show');
+          alert('❌ ' + error);
+        })
+        .submitInspectionBatch(dataArray);
+    }
+  </script>
+</body>
+</html>

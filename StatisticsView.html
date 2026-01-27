@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>統計報表 - 工廠點檢系統</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    
+    .stats-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .kpi-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    
+    .kpi-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    
+    .kpi-label {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+    
+    .ranking-item {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .ranking-item.rank-1 { border-left-color: #FFD700; }
+    .ranking-item.rank-2 { border-left-color: #C0C0C0; }
+    .ranking-item.rank-3 { border-left-color: #CD7F32; }
+    .ranking-item.rank-4 { border-left-color: #90EE90; }
+    .ranking-item.rank-5 { border-left-color: #87CEEB; }
+    
+    .rank-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: white;
+      margin-right: 15px;
+    }
+    
+    .rank-1 .rank-badge { background: #FFD700; color: #000; }
+    .rank-2 .rank-badge { background: #C0C0C0; color: #000; }
+    .rank-3 .rank-badge { background: #CD7F32; }
+    .rank-4 .rank-badge { background: #90EE90; color: #000; }
+    .rank-5 .rank-badge { background: #87CEEB; color: #000; }
+    
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-top: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .kpi-value {
+        font-size: 2rem;
+      }
+      
+      .chart-container {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 標題 -->
+    <div class="stats-header">
+      <h1>
+        <i class="bi bi-graph-up"></i> 
+        統計分析
+      </h1>
+      <p class="mb-0">Statistics & Analysis</p>
+      <small>表單編號: QP-7.5-002</small>
+    </div>
+    
+    <!-- 期間選擇 -->
+    <div class="stats-card">
+      <h5 class="mb-4">
+        <i class="bi bi-calendar-range"></i> 
+        自訂統計期間
+      </h5>
+      
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">起始日期</label>
+          <input type="date" class="form-control" id="startDate">
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">結束日期</label>
+          <input type="date" class="form-control" id="endDate">
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label">快速選擇</label>
+          <div class="btn-group w-100" role="group">
+            <button class="btn btn-outline-primary" onclick="setQuickPeriod('week')">本週</button>
+            <button class="btn btn-outline-primary" onclick="setQuickPeriod('month')">本月</button>
+            <button class="btn btn-outline-primary" onclick="setQuickPeriod('quarter')">本季</button>
+            <button class="btn btn-outline-primary" onclick="setQuickPeriod('year')">本年</button>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn btn-primary mt-3" onclick="loadStatistics()">
+        <i class="bi bi-search"></i> 查詢
+      </button>
+    </div>
+    
+    <!-- KPI 指標 -->
+    <div class="stats-card">
+      <h5 class="mb-4">
+        <i class="bi bi-speedometer2"></i> 
+        關鍵績效指標
+      </h5>
+      
+      <div class="row">
+        <div class="col-md-3">
+          <div class="kpi-box">
+            <div class="kpi-label">完成率</div>
+            <div class="kpi-value" id="kpiCompletion">--</div>
+            <div class="kpi-label">Completion Rate</div>
+          </div>
+        </div>
+        
+        <div class="col-md-3">
+          <div class="kpi-box">
+            <div class="kpi-label">合格率</div>
+            <div class="kpi-value" id="kpiQualified">--</div>
+            <div class="kpi-label">Qualified Rate</div>
+          </div>
+        </div>
+        
+        <div class="col-md-3">
+          <div class="kpi-box">
+            <div class="kpi-label">缺失率</div>
+            <div class="kpi-value" id="kpiDefect">--</div>
+            <div class="kpi-label">Defect Rate</div>
+          </div>
+        </div>
+        
+        <div class="col-md-3">
+          <div class="kpi-box">
+            <div class="kpi-label">點檢次數</div>
+            <div class="kpi-value" id="kpiCount">--</div>
+            <div class="kpi-label">Total Inspections</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- NOK 前五名 -->
+    <div class="stats-card">
+      <h5 class="mb-4">
+        <i class="bi bi-trophy"></i> 
+        NOK 項目排名（前五名）
+      </h5>
+      
+      <div id="nokRanking">
+        <div class="text-center text-muted">
+          請選擇期間並點擊查詢
+        </div>
+      </div>
+    </div>
+    
+    <!-- 趨勢圖 -->
+    <div class="stats-card">
+      <h5 class="mb-4">
+        <i class="bi bi-graph-up-arrow"></i> 
+        OK率趨勢圖
+      </h5>
+      
+      <div class="chart-container">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- 圓餅圖 -->
+    <div class="stats-card">
+      <h5 class="mb-4">
+        <i class="bi bi-pie-chart"></i> 
+        狀態分布圓餅圖
+      </h5>
+      
+      <div class="chart-container" style="height: 350px;">
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    let trendChart = null;
+    let pieChart = null;
+    
+    // 初始化
+    window.onload = function() {
+      // 預設顯示本月
+      setQuickPeriod('month');
+    };
+    
+    // 設定快速期間
+    function setQuickPeriod(period) {
+      const today = new Date();
+      let startDate, endDate;
+      
+      switch(period) {
+        case 'week':
+          startDate = new Date(today);
+          startDate.setDate(today.getDate() - today.getDay());
+          endDate = today;
+          break;
+          
+        case 'month':
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          endDate = today;
+          break;
+          
+        case 'quarter':
+          const quarter = Math.floor(today.getMonth() / 3);
+          startDate = new Date(today.getFullYear(), quarter * 3, 1);
+          endDate = today;
+          break;
+          
+        case 'year':
+          startDate = new Date(today.getFullYear(), 0, 1);
+          endDate = today;
+          break;
+      }
+      
+      document.getElementById('startDate').valueAsDate = startDate;
+      document.getElementById('endDate').valueAsDate = endDate;
+      
+      loadStatistics();
+    }
+    
+    // 載入統計資料
+    function loadStatistics() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      
+      if (!startDate || !endDate) {
+        alert('請選擇日期範圍');
+        return;
+      }
+      
+      // 載入 KPI
+      google.script.run
+        .withSuccessHandler(updateKPI)
+        .calculateKPI(startDate, endDate);
+      
+      // 載入 NOK 排名
+      google.script.run
+        .withSuccessHandler(updateNOKRanking)
+        .rankTopNOK(startDate, endDate, 5);
+      
+      // 載入趨勢資料
+      google.script.run
+        .withSuccessHandler(updateTrendChart)
+        .generateTrendData(startDate, endDate);
+      
+      // 載入圓餅圖資料
+      google.script.run
+        .withSuccessHandler(updatePieChart)
+        .generatePieData(startDate, endDate);
+    }
+    
+    // 更新 KPI
+    function updateKPI(kpi) {
+      if (!kpi) return;
+      
+      document.getElementById('kpiCompletion').textContent = 
+        kpi.inspections.completionRate.toFixed(1) + '%';
+      document.getElementById('kpiQualified').textContent = 
+        kpi.rates.qualified.toFixed(1) + '%';
+      document.getElementById('kpiDefect').textContent = 
+        kpi.rates.defect.toFixed(1) + '%';
+      document.getElementById('kpiCount').textContent = 
+        kpi.inspections.actual;
+    }
+    
+    // 更新 NOK 排名
+    function updateNOKRanking(ranking) {
+      const container = document.getElementById('nokRanking');
+      
+      if (!ranking || ranking.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted">無資料</div>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      ranking.forEach(item => {
+        const div = document.createElement('div');
+        div.className = `ranking-item rank-${item.rank}`;
+        div.innerHTML = `
+          <div class="d-flex align-items-center flex-grow-1">
+            <div class="rank-badge">${item.rank}</div>
+            <div>
+              <div class="fw-bold">${item.area} - ${item.itemName}</div>
+              <small class="text-muted">NOK次數: ${item.nokCount} | 比率: ${item.nokRatio}%</small>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+    
+    // 更新趨勢圖
+    function updateTrendChart(trendData) {
+      if (!trendData || trendData.length === 0) return;
+      
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      
+      if (trendChart) {
+        trendChart.destroy();
+      }
+      
+      trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: trendData.map(d => d.date),
+          datasets: [{
+            label: 'OK率 (%)',
+            data: trendData.map(d => d.okRate),
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // 更新圓餅圖
+    function updatePieChart(pieData) {
+      if (!pieData || !pieData.data) return;
+      
+      const ctx = document.getElementById('pieChart').getContext('2d');
+      
+      if (pieChart) {
+        pieChart.destroy();
+      }
+      
+      pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: pieData.data.map(d => `${d.label} (${d.percentage}%)`),
+          datasets: [{
+            data: pieData.data.map(d => d.value),
+            backgroundColor: pieData.data.map(d => d.color)
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
