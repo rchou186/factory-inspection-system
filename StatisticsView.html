@@ -1,5 +1,41 @@
 <!DOCTYPE html>
 <html>
+<!--
+============================================================================
+工廠環境衛生點檢管理系統 - 統計報表介面
+Factory Environmental Hygiene Inspection System - Statistics View
+============================================================================
+
+@file        StatisticsView.html
+@version     v2.2.5
+@date        2026-01-26
+@author      System Developer
+@description 統計分析報表介面，提供自訂期間統計、NOK 排名、趨勢圖與
+             圓餅圖分析功能
+
+@features
+  - 自訂期間統計（任意日期範圍）
+  - 快速期間選擇（本週/本月/本季/本年）
+  - NOK 項目排名（前五名）
+  - 趨勢圖分析（各區域 OK 率）
+  - 圓餅圖分布（OK/NOK/待追蹤）
+  - 一鍵匯出 Excel
+  - 動態表單編號（從 System_Config 讀取）
+
+@dependencies
+  - Bootstrap 5.3.0
+  - Bootstrap Icons 1.10.0
+  - Google Charts API
+  - Code.gs (getSystemConfig)
+  - Statistics.gs (generateCustomPeriodReport)
+
+@changelog
+  v2.2.5 (2026-01-26) - ISO 22000 整合，動態表單編號
+  v2.2.4 (2026-01-26) - 統計報表功能完善
+  v2.2.0 (2026-01-22) - 自訂期間、前五名排名、圖表視覺化
+
+============================================================================
+-->
 <head>
   <base target="_top">
   <meta charset="UTF-8">
@@ -119,7 +155,7 @@
         統計分析
       </h1>
       <p class="mb-0">Statistics & Analysis</p>
-      <small>表單編號: QP-7.5-002</small>
+      <small>表單編號: <span id="formNumber">載入中...</span></small>
     </div>
     
     <!-- 期間選擇 -->
@@ -246,9 +282,25 @@
     
     // 初始化
     window.onload = function() {
+      loadSystemConfig();
       // 預設顯示本月
       setQuickPeriod('month');
     };
+    
+    // 載入系統設定（表單編號）
+    function loadSystemConfig() {
+      google.script.run
+        .withSuccessHandler(function(config) {
+          if (config && config.formNumber) {
+            document.getElementById('formNumber').textContent = config.formNumber;
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('載入系統設定失敗:', error);
+          document.getElementById('formNumber').textContent = 'P-4-001 版本 A1';
+        })
+        .getSystemConfig();
+    }
     
     // 設定快速期間
     function setQuickPeriod(period) {

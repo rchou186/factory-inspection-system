@@ -1,6 +1,41 @@
 /**
- * 告警系統模組
- * Alert System Module
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 告警系統模組
+ * Factory Environmental Hygiene Inspection System - Alert System Module
+ * ============================================================================
+ * 
+ * @file        AlertSystem.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 負責溫濕度超標告警的發送、抑制、記錄等功能，包含 Email 通知、
+ *              告警歷史記錄、告警抑制機制等
+ * 
+ * @functions
+ *   - sendTempHumidityAlert()         發送溫濕度告警
+ *   - isAlertSuppressed()             檢查告警是否被抑制
+ *   - getAlertRecipients()            取得告警收件人
+ *   - buildAlertEmailBody()           建立告警郵件內容
+ *   - logAlertHistory()               記錄告警歷史
+ *   - getAlertHistory()               查詢告警歷史
+ *   - sendAlertEmail()                發送告警郵件
+ * 
+ * @dependencies
+ *   - Code.gs (SHEETS 常數)
+ *   - DataHandler.gs (資料查詢)
+ * 
+ * @features
+ *   - 告警抑制：1 小時內同一測點只發送 1 次
+ *   - 告警等級：警告、注意、嚴重
+ *   - 告警記錄：自動記錄所有告警歷史
+ *   - Email 通知：HTML 格式郵件
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合
+ *   v2.2.4 (2026-01-26) - 完整告警系統實作
+ *   v2.2.3 (2026-01-26) - 告警抑制機制
+ * 
+ * ============================================================================
  */
 
 // ==================== 溫濕度告警 ====================

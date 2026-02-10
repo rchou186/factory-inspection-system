@@ -1,10 +1,44 @@
 /**
- * 工廠環境衛生點檢管理系統
- * Factory Environmental Hygiene Inspection System
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 主程式模組
+ * Factory Environmental Hygiene Inspection System - Main Module
+ * ============================================================================
  * 
- * 文件編號: SYS-PLAN-2026-001
- * 版本: v2.2
- * ISO 9001 表單編號: QP-7.5-001
+ * @file        Code.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 系統主程式，包含選單建立、系統初始化、UI 介面開啟等核心功能
+ * 
+ * @iso_standard ISO 22000:2018 食品安全管理系統
+ * @form_number  P-4-001 版本 A1 (可在 System_Config 自訂)
+ * 
+ * @constants
+ *   - SHEETS       工作表名稱常數
+ *   - DEFAULTS     系統預設值
+ * 
+ * @functions
+ *   - onOpen()                建立選單（自動執行）
+ *   - initializeSystem()      初始化系統
+ *   - openInspectionForm()    開啟點檢表單
+ *   - openStatistics()        開啟統計報表
+ *   - exportData()            匯出資料
+ *   - getInspectorList()      取得點檢人員清單
+ *   - getSystemConfig()       取得系統設定（含表單編號）
+ * 
+ * @dependencies
+ *   - SheetInitializer.gs
+ *   - InspectionItems.gs
+ *   - DataHandler.gs
+ *   - AlertSystem.gs
+ *   - Statistics.gs
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合，動態表單編號
+ *   v2.2.4 (2026-01-26) - 效能優化，完整告警系統
+ *   v2.2.3 (2026-01-26) - UI 優化，資料路由修正
+ * 
+ * ============================================================================
  */
 
 // ==================== 全域變數設定 ====================
@@ -26,7 +60,8 @@ const SHEETS = {
 const DEFAULTS = {
   SHIFTS: ['早', '晚', '其它'],
   LANGUAGE: 'zh-TW',
-  ISO_FORM_PREFIX: 'QP-7.5-'
+  ISO_FORM_NUMBER: 'P-4-001 版本 A1',
+  ISO_STANDARD: 'ISO 22000:2018'
 };
 
 // ==================== 初始化函數 ====================
@@ -363,3 +398,53 @@ function getInspectorList() {
   }
 }
 
+/**
+ * 取得系統設定（包含 ISO 表單編號）
+ * @returns {Object} 系統設定物件
+ */
+function getSystemConfig() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEETS.SYSTEM_CONFIG);
+    
+    if (!sheet) {
+      logSystem('System_Config 工作表不存在，使用預設值', 'WARNING');
+      return {
+        formNumber: DEFAULTS.ISO_FORM_NUMBER,
+        isoStandard: DEFAULTS.ISO_STANDARD,
+        systemVersion: 'v2.2.5'
+      };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const config = {
+      formNumber: DEFAULTS.ISO_FORM_NUMBER,
+      isoStandard: DEFAULTS.ISO_STANDARD,
+      systemVersion: 'v2.2.5'
+    };
+    
+    // 讀取設定值
+    for (let i = 1; i < data.length; i++) {
+      const key = data[i][0];
+      const value = data[i][1];
+      
+      if (key === 'ISO表單編號' && value) {
+        config.formNumber = value.toString().trim();
+      } else if (key === 'ISO標準' && value) {
+        config.isoStandard = value.toString().trim();
+      } else if (key === '系統版本' && value) {
+        config.systemVersion = value.toString().trim();
+      }
+    }
+    
+    return config;
+    
+  } catch (error) {
+    logSystem('取得系統設定失敗：' + error.message, 'ERROR');
+    return {
+      formNumber: DEFAULTS.ISO_FORM_NUMBER,
+      isoStandard: DEFAULTS.ISO_STANDARD,
+      systemVersion: 'v2.2.5'
+    };
+  }
+}

@@ -1,6 +1,36 @@
 /**
- * 工作表初始化模組
- * Sheet Initializer Module
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 工作表初始化模組
+ * Factory Environmental Hygiene Inspection System - Sheet Initializer Module
+ * ============================================================================
+ * 
+ * @file        SheetInitializer.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 負責初始化所有 Google Sheets 工作表，包含表頭、格式設定、
+ *              預設資料填入等功能
+ * 
+ * @functions
+ *   - createSheet_InspectionRecords()    建立點檢記錄表
+ *   - createSheet_TempHumidity()         建立溫濕度記錄表
+ *   - createSheet_ItemMaster()           建立項目主檔表
+ *   - createSheet_CustomStatistics()     建立自訂統計表
+ *   - createSheet_SystemConfig()         建立系統設定表
+ *   - createSheet_TempCriteria()         建立溫濕度標準表
+ *   - createSheet_LanguageSettings()     建立語系設定表
+ *   - initializeTempCriteria()           初始化溫濕度標準資料
+ *   - initializeSystemConfig()           初始化系統設定資料
+ * 
+ * @dependencies
+ *   - Code.gs (SHEETS 常數)
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合，動態表單編號
+ *   v2.2.4 (2026-01-26) - 新增 Alert_History 工作表
+ *   v2.2.3 (2026-01-26) - 優化初始化流程
+ * 
+ * ============================================================================
  */
 
 // ==================== Sheet 1: 點檢記錄表 ====================
@@ -241,8 +271,9 @@ function initializeSystemConfig() {
     ['自動統計時間', '每日23:00'],
     ['數據保留期限', '3年'],
     ['預設語系', '繁體中文'],
-    ['ISO表單編號', 'QP-7.5-001'],
-    ['系統版本', 'v2.2.4'],
+    ['ISO表單編號', 'P-4-001 版本 A1'],
+    ['ISO標準', 'ISO 22000:2018'],
+    ['系統版本', 'v2.2.5'],
     ['最後更新日期', Utilities.formatDate(new Date(), 'GMT+8', 'yyyy-MM-dd')]
   ];
   

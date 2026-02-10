@@ -1,6 +1,33 @@
 /**
- * 多語系模組
- * Internationalization (i18n) Module
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 多語系模組
+ * Factory Environmental Hygiene Inspection System - i18n Module
+ * ============================================================================
+ * 
+ * @file        I18n.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 提供中英雙語系支援，管理所有 UI 介面的語系切換功能
+ * 
+ * @languages
+ *   - zh-TW：繁體中文
+ *   - en-US：English
+ * 
+ * @functions
+ *   - loadLanguage()                  載入語系資料
+ *   - translateUI()                   翻譯 UI 介面
+ *   - getCurrentLanguage()            取得當前語系
+ *   - setLanguage()                   設定使用語系
+ * 
+ * @dependencies
+ *   - Code.gs (SHEETS 常數)
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合
+ *   v2.2.0 (2026-01-22) - 多語系切換功能
+ * 
+ * ============================================================================
  */
 
 // ==================== 初始化語系資料 ====================

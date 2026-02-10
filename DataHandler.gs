@@ -1,6 +1,36 @@
 /**
- * 資料處理模組
- * Data Handler Module
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 資料處理模組
+ * Factory Environmental Hygiene Inspection System - Data Handler Module
+ * ============================================================================
+ * 
+ * @file        DataHandler.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 負責處理所有資料的讀取、寫入、驗證與更新操作，包含點檢記錄、
+ *              溫濕度資料、批次提交等核心資料處理功能
+ * 
+ * @functions
+ *   - submitInspection()              提交單筆點檢資料
+ *   - submitInspectionBatch()         批次提交點檢資料
+ *   - submitTempHumidity()            提交溫濕度資料
+ *   - validateTempHumidity()          驗證溫濕度數值
+ *   - getPreviousStatus()             取得前次點檢狀態
+ *   - buildPreviousStatusMap()        建立狀態查找表
+ *   - generateRecordId()              產生記錄ID
+ *   - getInspectionHistory()          查詢歷史記錄
+ * 
+ * @dependencies
+ *   - Code.gs (SHEETS 常數)
+ *   - AlertSystem.gs (告警功能)
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合
+ *   v2.2.4 (2026-01-26) - 效能優化，批次處理改善
+ *   v2.2.3 (2026-01-26) - 溫濕度路由修正
+ * 
+ * ============================================================================
  */
 
 // ==================== 點檢資料提交 ====================

@@ -1,6 +1,35 @@
 /**
- * 觸發器模組
- * Triggers Module
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 觸發器模組
+ * Factory Environmental Hygiene Inspection System - Triggers Module
+ * ============================================================================
+ * 
+ * @file        Triggers.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 管理系統定時觸發器，包含每日統計、自動報表產生等排程任務
+ * 
+ * @functions
+ *   - setupTriggers()                 設定定時觸發器
+ *   - dailyStatistics()               每日統計（23:00）
+ *   - autoGenerateReports()           自動產生報表
+ *   - cleanupOldData()                清理舊資料
+ * 
+ * @schedule
+ *   - 每日 23:00：執行統計
+ *   - 每週日：產生週報表
+ *   - 每月底：產生月報表
+ * 
+ * @dependencies
+ *   - Code.gs (SHEETS 常數)
+ *   - Statistics.gs (統計功能)
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合
+ *   v2.2.0 (2026-01-22) - 觸發器管理功能
+ * 
+ * ============================================================================
  */
 
 // ==================== 觸發器設定 ====================

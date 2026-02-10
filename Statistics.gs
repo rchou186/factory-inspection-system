@@ -1,6 +1,32 @@
 /**
- * 統計分析模組
- * Statistics Module
+ * ============================================================================
+ * 工廠環境衛生點檢管理系統 - 統計分析模組
+ * Factory Environmental Hygiene Inspection System - Statistics Module
+ * ============================================================================
+ * 
+ * @file        Statistics.gs
+ * @version     v2.2.5
+ * @date        2026-01-26
+ * @author      System Developer
+ * @description 負責點檢資料的統計分析，包含自訂期間統計、NOK 排名、趨勢分析等
+ * 
+ * @functions
+ *   - generateCustomPeriodReport()    產生自訂期間報表
+ *   - calculateOKRate()               計算 OK 率
+ *   - rankTopNOK()                    排名 NOK 前五項
+ *   - generateTrendData()             產生趨勢圖資料
+ *   - generatePieData()               產生圓餅圖資料
+ *   - exportStatistics()              匯出統計資料
+ * 
+ * @dependencies
+ *   - Code.gs (SHEETS 常數)
+ *   - DataHandler.gs (資料查詢)
+ * 
+ * @changelog
+ *   v2.2.5 (2026-01-26) - ISO 22000 整合
+ *   v2.2.0 (2026-01-22) - 自訂期間統計、前五名排名
+ * 
+ * ============================================================================
  */
 
 // ==================== 自訂期間統計 ====================
