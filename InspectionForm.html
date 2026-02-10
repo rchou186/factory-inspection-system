@@ -389,6 +389,87 @@ Factory Environmental Hygiene Inspection System - Inspection Form
       transform: translateY(-1px);
     }
     
+    /* 自訂 Alert 對話框 */
+    .custom-alert-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .custom-alert-overlay.show {
+      display: flex;
+    }
+    
+    .custom-alert-box {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 90%;
+      padding: 0;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .custom-alert-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px 12px 0 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .custom-alert-header.warning {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .custom-alert-header.success {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .custom-alert-body {
+      padding: 30px 20px;
+      font-size: 1.1rem;
+      color: #333;
+      line-height: 1.6;
+      text-align: center;
+    }
+    
+    .custom-alert-footer {
+      padding: 15px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .custom-alert-btn {
+      padding: 10px 30px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-width: 100px;
+    }
+    
+    .custom-alert-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
     .progress-summary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -548,6 +629,24 @@ Factory Environmental Hygiene Inspection System - Inspection Form
         </div>
       </div>
     </div>
+    
+    <!-- 自訂 Alert 對話框 -->
+    <div class="custom-alert-overlay" id="customAlertOverlay">
+      <div class="custom-alert-box">
+        <div class="custom-alert-header" id="alertHeader">
+          <i class="bi bi-exclamation-circle"></i>
+          <span id="alertTitle">提示</span>
+        </div>
+        <div class="custom-alert-body" id="alertMessage">
+          訊息內容
+        </div>
+        <div class="custom-alert-footer">
+          <button class="custom-alert-btn" id="alertOkBtn">
+            <i class="bi bi-check-circle"></i> 確定
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   
   <!-- Bootstrap JS -->
@@ -664,7 +763,7 @@ Factory Environmental Hygiene Inspection System - Inspection Form
           updateTotalProgress();
         })
         .withFailureHandler(function(error) {
-          alert('載入區域失敗: ' + error);
+          customAlert('載入區域失敗: ' + error, 'error');
         })
         .getAllInspectionItems();
     }
@@ -860,6 +959,59 @@ Factory Environmental Hygiene Inspection System - Inspection Form
       if (currentArea) renderItems();
     }
     
+    // 自訂 Alert 對話框
+    function customAlert(message, type = 'info') {
+      const overlay = document.getElementById('customAlertOverlay');
+      const messageEl = document.getElementById('alertMessage');
+      const okBtn = document.getElementById('alertOkBtn');
+      const header = document.getElementById('alertHeader');
+      const title = document.getElementById('alertTitle');
+      
+      // 設定訊息
+      messageEl.textContent = message;
+      
+      // 設定樣式和圖示（根據類型）
+      header.classList.remove('warning', 'success');
+      let icon = 'bi-exclamation-circle';
+      let titleText = currentLang === 'zh-TW' ? '提示' : 'Notice';
+      
+      if (type === 'warning') {
+        header.classList.add('warning');
+        icon = 'bi-exclamation-triangle';
+        titleText = currentLang === 'zh-TW' ? '警告' : 'Warning';
+      } else if (type === 'success') {
+        header.classList.add('success');
+        icon = 'bi-check-circle';
+        titleText = currentLang === 'zh-TW' ? '成功' : 'Success';
+      } else if (type === 'error') {
+        header.classList.add('warning');
+        icon = 'bi-x-circle';
+        titleText = currentLang === 'zh-TW' ? '錯誤' : 'Error';
+      }
+      
+      header.innerHTML = `<i class="bi ${icon}"></i><span>${titleText}</span>`;
+      
+      // 更新按鈕文字
+      okBtn.innerHTML = currentLang === 'zh-TW' 
+        ? '<i class="bi bi-check-circle"></i> 確定' 
+        : '<i class="bi bi-check-circle"></i> OK';
+      
+      // 顯示對話框
+      overlay.classList.add('show');
+      
+      // 確定按鈕事件
+      okBtn.onclick = function() {
+        overlay.classList.remove('show');
+      };
+      
+      // 點擊背景關閉
+      overlay.onclick = function(e) {
+        if (e.target === overlay) {
+          overlay.classList.remove('show');
+        }
+      };
+    }
+    
     // 自訂確認對話框
     function customConfirm(message, onConfirm) {
       const overlay = document.getElementById('customConfirmOverlay');
@@ -926,7 +1078,10 @@ Factory Environmental Hygiene Inspection System - Inspection Form
       const inspector = document.getElementById('inspectorName').value;
       
       if (!date || !shift || !inspector) {
-        alert(currentLang === 'zh-TW' ? '請填寫所有必填欄位！' : 'Please fill in all required fields!');
+        customAlert(
+          currentLang === 'zh-TW' ? '請填寫所有必填欄位！' : 'Please fill in all required fields!',
+          'warning'
+        );
         return;
       }
       
@@ -958,7 +1113,10 @@ Factory Environmental Hygiene Inspection System - Inspection Form
       });
       
       if (dataArray.length === 0) {
-        alert(currentLang === 'zh-TW' ? '請至少完成一個項目的點檢！' : 'Please complete at least one item!');
+        customAlert(
+          currentLang === 'zh-TW' ? '請至少完成一個項目的點檢！' : 'Please complete at least one item!',
+          'warning'
+        );
         return;
       }
       
@@ -974,20 +1132,23 @@ Factory Environmental Hygiene Inspection System - Inspection Form
           .withSuccessHandler(function(result) {
             document.getElementById('loadingDiv').classList.remove('show');
             if (result.success) {
-              alert(currentLang === 'zh-TW' 
-                ? `✅ 提交成功！共 ${result.count} 筆記錄` 
-                : `✅ Success! ${result.count} records`);
+              customAlert(
+                currentLang === 'zh-TW' 
+                  ? `✅ 提交成功！共 ${result.count} 筆記錄` 
+                  : `✅ Success! ${result.count} records`,
+                'success'
+              );
               inspectionData = {};
               renderAreas();
               updateTotalProgress();
               document.getElementById('itemsSection').style.display = 'none';
             } else {
-              alert('❌ ' + result.error);
+              customAlert('❌ ' + result.error, 'error');
             }
           })
           .withFailureHandler(function(error) {
             document.getElementById('loadingDiv').classList.remove('show');
-            alert('❌ ' + error);
+            customAlert('❌ ' + error, 'error');
           })
           .submitInspectionBatch(dataArray);
       });
